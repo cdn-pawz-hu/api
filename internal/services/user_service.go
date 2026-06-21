@@ -1,17 +1,45 @@
 package services
 
 import (
+	"cdn-api/internal/dto"
 	"cdn-api/internal/models"
+	"cdn-api/internal/repositories"
+	"context"
 	"errors"
 )
 
-type UserService struct {
+type UserService interface {
+	RegisterUser(ctx context.Context, req dto.CreateUserRequest) (*dto.UserResponse, error)
 }
 
-func (s *UserService) CreateUser(name string, age int) (*models.User, error) {
-	if age < 18 {
-		return nil, errors.New("User must be an adult ")
+type userService struct {
+	repo repositories.UserRepository
+}
+
+func NewUserService(repo repositories.UserRepository) UserService {
+	return &userService{repo: repo}
+}
+
+func (s *userService) RegisterUser(ctx context.Context, req dto.CreateUserRequest) (*dto.UserResponse, error) {
+	// actual business logic is here
+
+	existing, _ := s.repo.FindByEmail(ctx, req.Email)
+	if existing != nil {
+		return nil, errors.New("email already in use")
 	}
-	user := &models.User{ID: "123", Age: age, Name: name}
-	return user, nil
+
+	user := &models.User{
+		Email:    req.Email,
+		Password: req.Password, // of course this would be hashed on an actual deployment
+	}
+
+	if err := s.repo.Create(ctx, user); err != nil {
+		return nil, err
+	}
+
+	return &dto.UserResponse{
+		ID:    user.ID,
+		Email: user.Email,
+		Role:  user.Role,
+	}, nil
 }

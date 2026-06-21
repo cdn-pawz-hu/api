@@ -1,7 +1,15 @@
 package models
 
+import (
+	"time"
+)
+
 type User struct {
-	ID   string `json:"id"`
-	Age  int    `json:"int"`
-	Name string `json:"name"`
+	ID        uint   `gorm:"primaryKey"`
+	Email     string `gorm:"uniqueIndex;not null;size:255"`
+	Password  string `gorm:"not null"`
+	Role      string `gorm:"type:varchar(20);default:'user'"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt time.Time
 }

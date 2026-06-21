@@ -23,8 +23,8 @@ func NewUserService(repo repositories.UserRepository) UserService {
 func (s *userService) RegisterUser(ctx context.Context, req dto.CreateUserRequest) (*dto.UserResponse, error) {
 	// actual business logic is here
 
-	existing, _ := s.repo.FindByEmail(ctx, req.Email)
-	if existing != nil {
+	_, err := s.repo.FindByEmail(ctx, req.Email)
+	if err == nil {
 		return nil, errors.New("email already in use")
 	}
 

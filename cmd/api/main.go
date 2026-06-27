@@ -1,10 +1,12 @@
 package main
 
 import (
+	"cdn-api/internal/config"
 	"cdn-api/internal/handlers"
 	"cdn-api/internal/models"
 	"cdn-api/internal/repositories"
 	"cdn-api/internal/services"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -13,8 +15,19 @@ import (
 	"gorm.io/gorm"
 )
 
+type Database struct {
+	cfg config.PostgresConfig
+}
+
 func main() {
-	dsn := "host=localhost user=postgres password=root dbname=api port=5432 sslmode=disable TimeZone=UTC"
+	config := config.Load()
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=UTC",
+		config.Postgres.Host,
+		config.Postgres.User,
+		config.Postgres.Password,
+		config.Postgres.DBName,
+		config.Postgres.Port,
+		config.Postgres.SSLMode)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
